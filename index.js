@@ -1,3 +1,14 @@
+class Question {
+  constructor(text, choices, answer) {
+    this.text = text;
+    this.choices = choices;
+    this.answer = answer;
+  }
+  isCorrectAnswer(choice) {
+    return choice === this.answer;
+  }
+}
+
 const questions = [
   new Question(
     "Quelle méthode Javascript permet de filtrer les éléments d'un tableau",
@@ -20,3 +31,80 @@ const questions = [
     "Math.round()"
   ),
 ];
+
+class Quiz {
+  constructor(questions) {
+    this.score = 0;
+    this.questions = questions;
+    this.currentIndex = 0;
+  }
+
+  getCurrentQuestion() {
+    return this.questions[this.currentIndex];
+  }
+
+  guess(answer) {
+    if (this.getCurrentQuestion().isCorrectAnswer(answer)) {
+      this.score++;
+    }
+    this.currentIndex++;
+  }
+
+  hasEnded() {
+    return this.currentIndex >= this.questions.length;
+  }
+}
+
+const display = {
+  elementShown: function (id, text) {
+    let element = document.getElementById(id);
+    element.innerHTML = text;
+  },
+  question: function () {
+    this.elementShown("question", quiz.getCurrentQuestion().text);
+  },
+
+  choices: function () {
+    let choices = quiz.getCurrentQuestion().choices;
+
+    guessHandler = (id, guess) => {
+      document.getElementById(id).onclick = function () {
+        quiz.guess(guess);
+        quizApp();
+      };
+    };
+
+    for (let i = 0; i < choices.length; i++) {
+      this.elementShown("choice" + i, choices[i]);
+      guessHandler("guess" + i, choices[i]);
+    }
+  },
+
+  progress: function () {
+    this.elementShown(
+      "progress",
+      `Question ${quiz.currentIndex + 1} sur ${quiz.questions.length}`
+    );
+  },
+
+  endQuiz: function () {
+    let endQuizHTML = `
+    <h1>Quiz terminé</h1>
+    <h3> Votre score est de ${quiz.score} / ${quiz.questions.length}</h3>
+    `;
+    this.elementShown("quiz", endQuizHTML);
+  },
+};
+
+quizApp = () => {
+  if (quiz.hasEnded()) {
+    display.endQuiz();
+  } else {
+    display.question();
+    display.choices();
+    display.progress();
+  }
+};
+
+let quiz = new Quiz(questions);
+quizApp();
